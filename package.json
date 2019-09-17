@@ -1,5 +1,5 @@
 {
-  "name": "coreapinodesample",
+  "name": "coreapinodejssample",
   "version": "1.0.0",
   "description": "Sample code demonstrating OAuth and other features of Core Public API",
   "main": "app.js",
