@@ -1,0 +1,28 @@
+{
+  "name": "coreapinodesample",
+  "version": "1.0.0",
+  "description": "Sample code demonstrating OAuth and other features of Core Public API",
+  "main": "app.js",
+  "scripts": {
+    "test": "npm start"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/BQEDeveloper"
+  },
+  "keywords": [
+    "Core API Node Sample",
+    "Core API Sample"
+  ],
+  "author": "Arif Nazir",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "consolidate": "^0.15.1",
+    "express": "^4.17.1",
+    "express-session": "^1.16.2",
+    "ini": "^1.3.5",
+    "mustache": "^3.1.0",
+    "swig": "^1.4.2"
+  }
+}
