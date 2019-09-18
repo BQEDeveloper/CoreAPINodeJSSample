@@ -3,7 +3,7 @@ A sample app demonstrating OAuth 2.0 and other features using Core API.
 
 ## Getting Started
 
-  1. Clone the Core API-NodeJS-Sample project on your local environment.
+  1. Clone the CoreAPINodeJSSample project on your local environment.
   2. Go to Config.ini and insert the client_secret, client_id and redirect_uri of your app. Please note the redirect_uri should point to the index.html file of the project.
      As an example, if you are running Node Js on your localhost with port 8081, the redirect_uri will look like
      http://127.0.0.1:8081. Note: The redirect_uri of your app should exactly match with the redirect_uri in your config file.
