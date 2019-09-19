@@ -5,6 +5,7 @@ var UserInfoModel = require(__dirname + "/../models/UserInfoModel.js");
 var APIHelper = require(__dirname + "/../shared/APIHelper.js");
 var GeneralMethods = require(__dirname + "/../shared/GeneralMethods.js");
 var AuthManager = require(__dirname + "/AuthManager.js");
+const Result = require(__dirname + "/../shared/Result.js");
 
 class UserInfoManager {
 
@@ -33,18 +34,19 @@ class UserInfoManager {
             APIHelper.Get(this.config.CoreIdentityBaseUrl + '/connect/userinfo', this.httpHeader, function(response){
                 this.httpResponse = response;
                 if(this.httpResponse.header_code == 401) { //UnAuthorised
-                    this.authManager.ReAuthorize(function(response){
-                        if(response) {
+                    this.authManager.ReAuthorize(function(status, response){
+                        if(status == Result.Success && response) {
                             this.authResponse = response;
                             this.httpHeader.authorization = "Bearer " + this.authResponse.access_token;
                             this.GetUserInfo(callback);
-                        }
+                        } else //Error
+                            callback(Result.Error, response)
                     }.bind(this));
                 } else if(this.httpResponse.header_code == 200) { // Success
                     this.userInfo = JSON.parse(this.httpResponse.body)
-                    callback(this.userInfo);             
+                    callback(Result.Success, this.userInfo);             
                 } else
-                    throw new Error(this.httpResponse);
+                    callback(Result.Error, this.userInfo);
             }.bind(this));     
             
         } catch (error) {

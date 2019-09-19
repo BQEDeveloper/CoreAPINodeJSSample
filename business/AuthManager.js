@@ -3,6 +3,7 @@ var HttpHeaderModel = require(__dirname + "/../models/HttpHeaderModel.js");
 var HttpResponseModel = require(__dirname + "/../models/HttpResponseModel.js");
 var APIHelper = require(__dirname + "/../shared/APIHelper.js");
 var GeneralMethods = require(__dirname + "/../shared/GeneralMethods.js");
+const Result = require(__dirname + "/../shared/Result.js");
 
 const fs = require('fs')
 
@@ -44,8 +45,9 @@ class AuthManager {
                 this.httpResponse = response;
                 if(this.httpResponse.header_code == 200) {
                     this.SaveAuthResponse(null);
-                    callback(true);                   
-                }
+                    callback(Result.Success, this.httpResponse);                   
+                } else
+                    callback(Result.Error, this.httpResponse);
             }.bind(this));                                
         } catch (error) {
             throw new Error(error)
@@ -62,10 +64,10 @@ class AuthManager {
                 this.httpResponse = response;
                 if(this.httpResponse.header_code == 200) {
                     this.authResponse = JSON.parse(this.httpResponse.body)
-                    callback(this.authResponse);             
+                    callback(Result.Success, this.authResponse);             
                 }      
                 else
-                    throw new Error(this.httpResponse);
+                    callback(Result.Error, this.httpResponse);
             }.bind(this));                               
         } catch (error) {
             throw new Error(error)
@@ -86,10 +88,10 @@ class AuthManager {
                     if(this.httpResponse.header_code == 200) {
                         this.authResponse = JSON.parse(this.httpResponse.body)
                         this.SaveAuthResponse(this.authResponse);
-                        callback(this.authResponse);             
+                        callback(Result.Success, this.authResponse);             
                     }      
                     else
-                        throw new Error(this.httpResponse);
+                        callback(Result.Error, this.httpResponse);
                 }.bind(this));
             }                                                        
         } catch (error) {

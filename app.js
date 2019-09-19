@@ -13,6 +13,7 @@ var AuthManager = require(__dirname + "/business/AuthManager.js");
 var ActivityManager = require(__dirname + "/business/ActivityManager.js");
 var UserInfoManager = require(__dirname + "/business/UserInfoManager.js");
 var JWTManager = require(__dirname + "/business/JWTManager.js");
+const Result = require(__dirname + "/shared/Result.js");
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(session({secret: GeneralMethods.GenerateRandomString() }));
@@ -33,44 +34,60 @@ app.get('/', function (req, res) {
         if(req.query.code != null) { //Authenticate (Code Exchange)
             //verfiy that the state parameter returned by the server is the same that was sent earlier.
             if(this.authManager.IsValidState(req, res, req.query.state)){
-                this.authManager.Authorize(req.query.code,function(response){
-                    this.authResponse = response;
-                    this.jWTManager = new JWTManager(this.config, this.authResponse.id_token);
-                    //Decode id_token (JWT)
-                    jwt = this.jWTManager.DecodeJWT();
-                    //Validate the Decoded Token
-                    this.jWTManager.ValidateJWT(jwt,function(response){
-                        if(response){
-                            //Save Auth Response
-                            this.authManager.SaveAuthResponse(this.authResponse);
-                            //Load Activity List  
-                            this.activityManager = new ActivityManager();              
-                            this.activityManager.GetList(function(response){
-                                let activityList = response;
-                                //Get User Info
-                                this.userInfoManager = new UserInfoManager();
-                                this.userInfoManager.GetUserInfo(function(response){
-                                    let userInfo = response
-                                    res.render('ActivityListView', { activityList: activityList, userInfo: userInfo } );
-                                }.bind(this));                    
-                            }.bind(this));
-                        } else
-                            throw new Error("Invalid JWT.");                        
-                    }.bind(this))                                                                                                        
+                this.authManager.Authorize(req.query.code,function(status, response){
+                    if(status == Result.Success && response) {
+                        this.authResponse = response;
+                        this.jWTManager = new JWTManager(this.config, this.authResponse.id_token);
+                        //Decode id_token (JWT)
+                        jwt = this.jWTManager.DecodeJWT();
+                        //Validate the Decoded Token
+                        this.jWTManager.ValidateJWT(jwt,function(response){
+                            if(response){
+                                //Save Auth Response
+                                this.authManager.SaveAuthResponse(this.authResponse);
+                                //Load Activity List  
+                                this.activityManager = new ActivityManager();              
+                                this.activityManager.GetList(function(status, response){
+                                    if(status == Result.Success && response) {
+                                        let activityList = response;
+                                        //Get User Info
+                                        this.userInfoManager = new UserInfoManager();
+                                        this.userInfoManager.GetUserInfo(function(status, response){
+                                            if(status == Result.Success && response) {
+                                                let userInfo = response
+                                                res.render('ActivityListView', { activityList: activityList, userInfo: userInfo } );
+                                            } else //Error
+                                                res.write("<div style='color:red'>" + response.body + "</div>")                                            
+                                        }.bind(this));
+                                    }
+                                    else //Error
+                                        res.write("<div style='color:red'>" + response.body + "</div>")                                                        
+                                }.bind(this));
+                            } else
+                            res.write("<div style='color:red'>Invalid JWT.</div>")                        
+                        }.bind(this))
+                    } else //Error
+                        res.write("<div style='color:red'>" + response.body + "</div>")                                                                                                                         
                 }.bind(this));            
             } else
                 throw new Error("State Parameter returned doesn't match to the one sent to Core API Server.");
         } else if(this.authManager.GetAuthResponse()){ // Load Activity List
             //Load Activity List  
             this.activityManager = new ActivityManager();              
-            this.activityManager.GetList(function(response){
-                let activityList = response;
-                //Get User Info
-                this.userInfoManager = new UserInfoManager();
-                this.userInfoManager.GetUserInfo(function(response){
-                    let userInfo = response
-                    res.render('ActivityListView', { activityList: activityList, userInfo: userInfo } );
-                }.bind(this));                    
+            this.activityManager.GetList(function(status, response){
+                if(status == Result.Success && response){
+                    let activityList = response;
+                    //Get User Info
+                    this.userInfoManager = new UserInfoManager();
+                    this.userInfoManager.GetUserInfo(function(status, response){
+                        if(status == Result.Success && response) {
+                            let userInfo = response
+                            res.render('ActivityListView', { activityList: activityList, userInfo: userInfo } );
+                        } else //Error
+                            res.write("<div style='color:red'>" + response.body + "</div>")
+                    }.bind(this));
+                } else //Error
+                    res.write("<div style='color:red'>" + response.body + "</div>")             
             }.bind(this));
         } else { // Load index.html
             res.sendFile(__dirname +'/index.html');
@@ -90,9 +107,11 @@ app.post('/ConnectToCore', function (req, res) {
 
 app.post('/DisconnectFromCore', function (req, res) {
     try {
-        this.authManager.DisconnectFromCore(function(response){
-            if (response)
+        this.authManager.DisconnectFromCore(function(status, response){
+            if (status == Result.Success && response)
                 res.redirect('/');
+            else // Error
+                res.write("<div style='color:red'>" + response.body + "</div>")
         });
     } catch (error) {        
         res.write("<div style='color:red'>" + error + "</div>")
@@ -103,9 +122,11 @@ app.get('/DeleteActivityView', function (req, res) {
     try {
         if(req.query.id){
             this.activityManager = new ActivityManager(); 
-            this.activityManager.Delete(req.query.id, function(response){
-                if (response)
+            this.activityManager.Delete(req.query.id, function(status, response){
+                if (status == Result.Success && response)
                     res.redirect('/');
+                else // Error
+                    res.write("<div style='color:red'>" + response.body + "</div>")
             });
         }        
     } catch (error) {        
@@ -117,11 +138,14 @@ app.get('/CreateActivityView', function (req, res) {
     try {
         if(req.query.id){ //load Activity
             this.activityManager = new ActivityManager(); 
-            this.activityManager.Get(req.query.id, function(response){
-                let activity = response;
-                if(activity.billable)
-                    activity.billable = 'checked';
-                res.render('CreateActivityView', { activity: activity } );
+            this.activityManager.Get(req.query.id, function(status, response){
+                if(status == Result.Success && response) {
+                    let activity = response;
+                    if(activity.billable)
+                        activity.billable = 'checked';
+                    res.render('CreateActivityView', { activity: activity } );
+                } else // Error
+                    res.write("<div style='color:red'>" + response.body + "</div>")                
             });
         } else // New Activity
             res.render('CreateActivityView');
@@ -143,12 +167,18 @@ app.post('/SubmitActivity', function (req, res) {
             activity.billable = true;
         if(req.body.id) { // Update
             activity.id = req.body.id;
-            this.activityManager.Update(activity.id, activity, function(response){
-                res.redirect('/');
+            this.activityManager.Update(activity.id, activity, function(status, response){
+                if(status == Result.Success && response)
+                    res.redirect('/');
+                else // Error
+                    res.write("<div style='color:red'>" + response.body + "</div>")
             });
         } else { // Create
-            this.activityManager.Create(activity, function(response){
-                res.redirect('/');
+            this.activityManager.Create(activity, function(status, response){
+                if(status == Result.Success && response)
+                    res.redirect('/');
+                else // Error
+                    res.write("<div style='color:red'>" + response.body + "</div>")
             });
         }
     } catch (error) {        

@@ -5,6 +5,7 @@ var ActivityModel = require(__dirname + "/../models/ActivityModel.js");
 var APIHelper = require(__dirname + "/../shared/APIHelper.js");
 var GeneralMethods = require(__dirname + "/../shared/GeneralMethods.js");
 var AuthManager = require(__dirname + "/AuthManager.js");
+const Result = require(__dirname + "/../shared/Result.js");
 
 class ActivityManager {
 
@@ -33,18 +34,19 @@ class ActivityManager {
             APIHelper.Get(this.config.CoreAPIBaseUrl + '/activity?page=0,100&orderby=name', this.httpHeader, function(response){
                 this.httpResponse = response;
                 if(this.httpResponse.header_code == 401) { //UnAuthorised
-                    this.authManager.ReAuthorize(function(response){
-                        if(response) {
+                    this.authManager.ReAuthorize(function(status, response){
+                        if(status == Result.Success && response) {
                             this.authResponse = response;
                             this.httpHeader.authorization = "Bearer " + this.authResponse.access_token;
                             this.GetList(callback);
-                        }
+                        } else //Error
+                            callback(Result.Error, response)
                     }.bind(this));
                 } else if(this.httpResponse.header_code == 200) { // Success
                     this.activityList = JSON.parse(this.httpResponse.body)
-                    callback(this.activityList);             
+                    callback(Result.Success, this.activityList);             
                 } else
-                    throw new Error(this.httpResponse);
+                    callback(Result.Error, this.httpResponse);
             }.bind(this));     
             
         } catch (error) {
@@ -58,18 +60,19 @@ class ActivityManager {
             APIHelper.Get(this.config.CoreAPIBaseUrl + '/activity/' + id, this.httpHeader, function(response){
                 this.httpResponse = response;
                 if(this.httpResponse.header_code == 401) { //UnAuthorised
-                    this.authManager.ReAuthorize(function(response){
-                        if(response) {
+                    this.authManager.ReAuthorize(function(status, response){
+                        if(status == Result.Success && response) {
                             this.authResponse = response;
                             this.httpHeader.authorization = "Bearer " + this.authResponse.access_token;
                             this.Get(id, callback);
-                        }
+                        } else //Error
+                            callback(Result.Error, response)
                     }.bind(this));
                 } else if(this.httpResponse.header_code == 200) { // Success
                     this.activity = JSON.parse(this.httpResponse.body)
-                    callback(this.activity);             
+                    callback(Result.Success, this.activity);             
                 } else
-                    throw new Error(this.httpResponse);
+                    callback(Result.Error, this.httpResponse);
             }.bind(this));     
             
         } catch (error) {
@@ -82,17 +85,18 @@ class ActivityManager {
             APIHelper.Post(this.config.CoreAPIBaseUrl + '/activity', JSON.stringify(activity), this.httpHeader, function(response){
                 this.httpResponse = response;
                 if(this.httpResponse.header_code == 401) { //UnAuthorised
-                    this.authManager.ReAuthorize(function(response){
-                        if(response) {
+                    this.authManager.ReAuthorize(function(status, response){
+                        if(status == Result.Success && response) {
                             this.authResponse = response;
                             this.httpHeader.authorization = "Bearer " + this.authResponse.access_token;
                             this.Create(activity, callback);
-                        }
+                        } else //Error
+                            callback(Result.Error, response)
                     }.bind(this));
                 } else if(this.httpResponse.header_code == 200 || this.httpResponse.header_code == 201) { // Success or Created
-                    callback(this.httpResponse);             
+                    callback(Result.Success, this.httpResponse);             
                 } else
-                    throw new Error(this.httpResponse);
+                    callback(Result.Error, this.httpResponse);
             }.bind(this));     
             
         } catch (error) {
@@ -105,18 +109,19 @@ class ActivityManager {
             APIHelper.Put(this.config.CoreAPIBaseUrl + '/activity/' + id, JSON.stringify(activity), this.httpHeader, function(response){
                 this.httpResponse = response;
                 if(this.httpResponse.header_code == 401) { //UnAuthorised
-                    this.authManager.ReAuthorize(function(response){
-                        if(response) {
+                    this.authManager.ReAuthorize(function(status, response){
+                        if(status == Result.Success && response) {
                             this.authResponse = response;
                             this.httpHeader.authorization = "Bearer " + this.authResponse.access_token;
                             this.Update(id, activity, callback);
-                        }
+                        } else //Error
+                            callback(Result.Error, response)
                     }.bind(this));
                 } else if(this.httpResponse.header_code == 200) { // Success
                     this.activity = JSON.parse(this.httpResponse.body)
-                    callback(this.activity);             
+                    callback(Result.Success, this.activity);             
                 } else
-                    throw new Error(this.httpResponse);
+                    callback(Result.Error, this.httpResponse);
             }.bind(this));     
             
         } catch (error) {
@@ -129,17 +134,18 @@ class ActivityManager {
             APIHelper.Delete(this.config.CoreAPIBaseUrl + '/activity/' + id, this.httpHeader, function(response){
                 this.httpResponse = response;
                 if(this.httpResponse.header_code == 401) { //UnAuthorised
-                    this.authManager.ReAuthorize(function(response){
-                        if(response) {
+                    this.authManager.ReAuthorize(function(status, response){
+                        if(status == Result.Success && response) {
                             this.authResponse = response;
                             this.httpHeader.authorization = "Bearer " + this.authResponse.access_token;
                             this.Delete(id, callback);
-                        }
+                        } else //Error
+                            callback(Result.Error, response)
                     }.bind(this));
                 } else if(this.httpResponse.header_code == 200 || this.httpResponse.header_code == 204) { // Success or No-Content                    
-                    callback(this.httpResponse);             
+                    callback(Result.Success, this.httpResponse);             
                 } else
-                    throw new Error(this.httpResponse);
+                    callback(Result.Error, this.httpResponse);
             }.bind(this));     
             
         } catch (error) {
