@@ -3,7 +3,6 @@ var HttpHeaderModel = require(__dirname + "/../models/HttpHeaderModel.js");
 var HttpResponseModel = require(__dirname + "/../models/HttpResponseModel.js");
 var ActivityModel = require(__dirname + "/../models/ActivityModel.js");
 var APIHelper = require(__dirname + "/../shared/APIHelper.js");
-var GeneralMethods = require(__dirname + "/../shared/GeneralMethods.js");
 var AuthManager = require(__dirname + "/AuthManager.js");
 const Result = require(__dirname + "/../shared/Result.js");
 
@@ -12,7 +11,6 @@ class ActivityManager {
 
     constructor() {
         try {
-            this.config = GeneralMethods.GetConfig();
 
             this.authResponse = new AuthResponseModel();
             this.authManager = new AuthManager();                    
@@ -31,7 +29,7 @@ class ActivityManager {
     GetList(callback) {
         try {
             this.activityList = [];
-            APIHelper.Get(this.config.CoreAPIBaseUrl + '/activity?page=0,100&orderby=name', this.httpHeader, function(response){
+            APIHelper.Get(this.authResponse.endpoint + '/activity?page=0,1000&orderby=name', this.httpHeader, function(response){
                 this.httpResponse = response;
                 if(this.httpResponse.header_code == 401) { //UnAuthorised
                     this.authManager.ReAuthorize(function(status, response){
@@ -57,7 +55,7 @@ class ActivityManager {
     Get(id, callback) {
         try {
             this.activity = new ActivityModel();
-            APIHelper.Get(this.config.CoreAPIBaseUrl + '/activity/' + id, this.httpHeader, function(response){
+            APIHelper.Get(this.authResponse.endpoint + '/activity/' + id, this.httpHeader, function(response){
                 this.httpResponse = response;
                 if(this.httpResponse.header_code == 401) { //UnAuthorised
                     this.authManager.ReAuthorize(function(status, response){
@@ -82,7 +80,7 @@ class ActivityManager {
 
     Create(activity, callback) {
         try {            
-            APIHelper.Post(this.config.CoreAPIBaseUrl + '/activity', JSON.stringify(activity), this.httpHeader, function(response){
+            APIHelper.Post(this.authResponse.endpoint + '/activity', JSON.stringify(activity), this.httpHeader, function(response){
                 this.httpResponse = response;
                 if(this.httpResponse.header_code == 401) { //UnAuthorised
                     this.authManager.ReAuthorize(function(status, response){
@@ -106,7 +104,7 @@ class ActivityManager {
 
     Update(id, activity, callback) {
         try {
-            APIHelper.Put(this.config.CoreAPIBaseUrl + '/activity/' + id, JSON.stringify(activity), this.httpHeader, function(response){
+            APIHelper.Put(this.authResponse.endpoint + '/activity/' + id, JSON.stringify(activity), this.httpHeader, function(response){
                 this.httpResponse = response;
                 if(this.httpResponse.header_code == 401) { //UnAuthorised
                     this.authManager.ReAuthorize(function(status, response){
@@ -131,7 +129,7 @@ class ActivityManager {
 
     Delete(id, callback) {
         try {
-            APIHelper.Delete(this.config.CoreAPIBaseUrl + '/activity/' + id, this.httpHeader, function(response){
+            APIHelper.Delete(this.authResponse.endpoint + '/activity/' + id, this.httpHeader, function(response){
                 this.httpResponse = response;
                 if(this.httpResponse.header_code == 401) { //UnAuthorised
                     this.authManager.ReAuthorize(function(status, response){

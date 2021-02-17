@@ -8,7 +8,6 @@ class GeneralMethods {
         try {
             const config = new ConfigModel();
             const configObj = ini.parse(fs.readFileSync(__dirname + '/../config.ini', 'utf-8'));
-            config.CoreAPIBaseUrl = configObj.urls.CoreAPIBaseUrl;
             config.CoreIdentityBaseUrl = configObj.urls.CoreIdentityBaseUrl;
             config.Secret = configObj.DeveloperAppConfig.Secret;
             config.ClientID = configObj.DeveloperAppConfig.ClientID;

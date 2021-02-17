@@ -5,6 +5,8 @@ class AuthResponseModel {
         this.expires_in;
         this.token_type;
         this.refresh_token;
+        this.scope;
+        this.endpoint;
     }
 }
 module.exports = AuthResponseModel;

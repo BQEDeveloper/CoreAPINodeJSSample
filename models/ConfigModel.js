@@ -1,6 +1,5 @@
 class ConfigModel {
     constructor() {
-        this.CoreAPIBaseUrl;
         this.CoreIdentityBaseUrl;
         this.Secret;
         this.ClientID;
