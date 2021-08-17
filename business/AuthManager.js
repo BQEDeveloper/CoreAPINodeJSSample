@@ -109,6 +109,8 @@ class AuthManager {
 
     SaveAuthResponse(authResponse) {
         try {
+            if(authResponse.endpoint.endsWith('/'))
+                authResponse.endpoint = authResponse.endpoint.slice(0, -1);
             fs.writeFileSync(__dirname + '/../AuthResponse.ini', JSON.stringify(authResponse) , 'utf-8');                       
         } catch (error) {
             throw new Error(error)
