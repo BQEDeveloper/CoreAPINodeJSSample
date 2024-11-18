@@ -2,24 +2,28 @@ var HttpResponseModel = require(__dirname + "/../models/HttpResponseModel.js");
 const https = require('https');
 
 class APIHelper {
-    
+
     constructor() {
         this.httpResponse = new HttpResponseModel();
     }
     static Get(url, httpHeader, callback) {
         try {
-            let httpResponse = new HttpResponseModel();      
+            let httpResponse = new HttpResponseModel();
             var options = {
                 method: 'GET',
                 headers: {
-                    'Content-Type': httpHeader.contentType, 
-                    'User-Agent': httpHeader.userAgent,                    
+                    'Content-Type': httpHeader.contentType,
+                    'User-Agent': httpHeader.userAgent,
                 }
-              }
-              if(httpHeader.authorization)
+            }
+            if (httpHeader.authorization)
                 options.headers.authorization = httpHeader.authorization;
-
-            const req = https.request(url, options, (res) => {
+            // Add URL parsing to options
+            const urlParts = new URL(url);
+            options.hostname = urlParts.hostname;
+            options.path = urlParts.pathname ;
+            options.port = urlParts.port || 443;
+            const req = https.request(options, (res) => {
 
                 httpResponse.header_code = res.statusCode;
                 httpResponse.header = res.headers
@@ -31,34 +35,39 @@ class APIHelper {
                     data += chunk;
                 });
                 // The whole response has been received. 
-                res.on('end', () => {                   
+                res.on('end', () => {
                     httpResponse.body = data;
-                    callback(httpResponse);                    
+                    callback(httpResponse);
                 });
 
             }).on("error", (err) => {
                 throw new Error(err)
             });
             req.end()
-            
+
         } catch (error) {
             throw new Error(error)
-        }        
+        }
     }
 
     static Post(url, data, httpHeader, callback) {
-        try {                  
+        try {
             var options = {
                 method: 'POST',
                 headers: {
-                    'Content-Type': httpHeader.contentType, 
-                    'User-Agent': httpHeader.userAgent,                    
+                    'Content-Type': httpHeader.contentType,
+                    'User-Agent': httpHeader.userAgent,
                 }
-              }
-              if(httpHeader.authorization)
+            }
+            if (httpHeader.authorization)
                 options.headers.authorization = httpHeader.authorization;
+            // Add URL parsing to options
+            const urlParts = new URL(url);
+            options.hostname = urlParts.hostname;
+            options.path = urlParts.pathname ;
+            options.port = urlParts.port || 443;
 
-            const req = https.request(url, options, (res) => { 
+            const req = https.request(options, (res) => {
                 this.httpResponse = new HttpResponseModel();
                 this.httpResponse.header_code = res.statusCode;
                 this.httpResponse.header = res.headers
@@ -70,9 +79,9 @@ class APIHelper {
                     responseData += chunk;
                 });
                 // The whole response has been received. 
-                res.on('end', () => {                   
+                res.on('end', () => {
                     this.httpResponse.body = responseData;
-                    callback(this.httpResponse);                    
+                    callback(this.httpResponse);
                 });
 
             }).on("error", (err) => {
@@ -80,26 +89,30 @@ class APIHelper {
             });
             req.write(data);
             req.end()
-            
+
         } catch (error) {
             throw new Error(error)
-        }        
+        }
     }
 
     static Put(url, data, httpHeader, callback) {
         try {
-            let httpResponse = new HttpResponseModel();      
+            let httpResponse = new HttpResponseModel();
             var options = {
                 method: 'PUT',
                 headers: {
-                    'Content-Type': httpHeader.contentType, 
-                    'User-Agent': httpHeader.userAgent,                    
+                    'Content-Type': httpHeader.contentType,
+                    'User-Agent': httpHeader.userAgent,
                 }
-              }
-              if(httpHeader.authorization)
+            }
+            if (httpHeader.authorization)
                 options.headers.authorization = httpHeader.authorization;
-
-            const req = https.request(url, options, (res) => {                
+            // Add URL parsing to options
+            const urlParts = new URL(url);
+            options.hostname = urlParts.hostname;
+            options.path = urlParts.pathname ;
+            options.port = urlParts.port || 443;
+            const req = https.request(options, (res) => {
 
                 httpResponse.header_code = res.statusCode;
                 httpResponse.header = res.headers
@@ -109,9 +122,9 @@ class APIHelper {
                     process.stdout.write(chunk);
                 });
                 // The whole response has been received. 
-                res.on('end', () => {                   
+                res.on('end', () => {
                     httpResponse.body = data;
-                    callback(httpResponse);                    
+                    callback(httpResponse);
                 });
 
             }).on("error", (err) => {
@@ -119,26 +132,30 @@ class APIHelper {
             });
             req.write(data);
             req.end()
-            
+
         } catch (error) {
             throw new Error(error)
-        }        
+        }
     }
 
     static Delete(url, httpHeader, callback) {
         try {
-            let httpResponse = new HttpResponseModel();      
+            let httpResponse = new HttpResponseModel();
             var options = {
                 method: 'DELETE',
                 headers: {
-                    'Content-Type': httpHeader.contentType, 
-                    'User-Agent': httpHeader.userAgent,                    
+                    'Content-Type': httpHeader.contentType,
+                    'User-Agent': httpHeader.userAgent,
                 }
-              }
-              if(httpHeader.authorization)
+            }
+            if (httpHeader.authorization)
                 options.headers.authorization = httpHeader.authorization;
-
-            const req = https.request(url, options, (res) => {
+            // Add URL parsing to options
+            const urlParts = new URL(url);
+            options.hostname = urlParts.hostname;
+            options.path = urlParts.pathname ;
+            options.port = urlParts.port || 443;
+            const req = https.request(options, (res) => {
 
                 httpResponse.header_code = res.statusCode;
                 httpResponse.header = res.headers
@@ -150,19 +167,19 @@ class APIHelper {
                     data += chunk;
                 });
                 // The whole response has been received. 
-                res.on('end', () => {                   
+                res.on('end', () => {
                     httpResponse.body = data;
-                    callback(httpResponse);                    
+                    callback(httpResponse);
                 });
 
             }).on("error", (err) => {
                 throw new Error(err)
             });
             req.end()
-            
+
         } catch (error) {
             throw new Error(error)
-        }        
+        }
     }
 
 }
